@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    input {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #667eea;
+    }
+
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .add-btn {
+      width: 100%;
+      background: #667eea;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    th {
+      background: #667eea;
+      color: white;
+      padding: 12px;
+    }
+
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    tr:hover {
+      background: #f9f9f9;
+    }
+
+    .edit {
+      background: #f6ad55;
+      color: white;
+    }
+
+    .delete {
+      background: #f56565;
+      color: white;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎓 Student Manager</h1>
+
+  <div class="form-group">
+    <input type="text" id="name" placeholder="Name">
+    <input type="text" id="roll" placeholder="Roll No">
+    <input type="text" id="address" placeholder="Address">
+  </div>
+
+  <button class="add-btn" onclick="addStudent()">Add / Update Student</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Roll</th>
+        <th>Address</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<script>
+  let students = JSON.parse(localStorage.getItem('students')) || [];
+  let editIndex = -1;
+
+  function saveToLocal() {
+    localStorage.setItem('students', JSON.stringify(students));
+  }
+
+  function addStudent() {
+    const name = document.getElementById('name').value.trim();
+    const roll = document.getElementById('roll').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    if (!name || !roll || !address) {
+      alert('All fields required');
+      return;
+    }
+
+    const student = { name, roll, address };
+
+    if (editIndex === -1) {
+      students.push(student);
+    } else {
+      students[editIndex] = student;
+      editIndex = -1;
+    }
+
+    saveToLocal();
+    clearForm();
+    render();
+  }
+
+  function render() {
+    const body = document.getElementById('tableBody');
+    body.innerHTML = '';
+
+    if (students.length === 0) {
+      body.innerHTML = `<tr><td colspan="4" class="empty">No students added yet</td></tr>`;
+      return;
+    }
+
+    students.forEach((s, i) => {
+      body.innerHTML += `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.roll}</td>
+          <td>${s.address}</td>
+          <td>
+            <button class="edit" onclick="editStudent(${i})">Edit</button>
+            <button class="delete" onclick="deleteStudent(${i})">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function editStudent(i) {
+    const s = students[i];
+    document.getElementById('name').value = s.name;
+    document.getElementById('roll').value = s.roll;
+    document.getElementById('address').value = s.address;
+    editIndex = i;
+  }
+
+  function deleteStudent(i) {
+    if (confirm('Delete this student?')) {
+      students.splice(i, 1);
+      saveToLocal();
+      render();
+    }
+  }
+
+  function clearForm() {
+    document.getElementById('name').value = '';
+    document.getElementById('roll').value = '';
+    document.getElementById('address').value = '';
+  }
+
+  render();
+</script>
+
+</body>
+</html>
